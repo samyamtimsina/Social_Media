@@ -7,40 +7,73 @@ const GetAllUsers = () => {
   const navigate = useNavigate(); // Initialize useNavigate
   const { user: userContext } = useContext(AuthContext);
   const [userData, setUserData] = useState(userContext);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
 
   const handleViewProfile = (myId) => {
     navigate(`/profile/${myId}`); // Navigate to the profile page with the user's ID
   };
 
   const handleFollowUser = async (userId) => {
-    const response = await axios.post(`/follow/${userId}`);
-    const newFollow = response.data;
+    setActionLoading(userId);
+    try {
+      const response = await axios.post(`/follow/${userId}`);
+      const newFollow = response.data;
 
-    setUserData((prev) => ({
-      ...prev,
-      following: [...prev.following, newFollow],
-    }));
+      setUserData((prev) => ({
+        ...prev,
+        following: [...(prev.following || []), newFollow],
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleUnfollowUser = async (userId) => {
-    const response = await axios.delete(`/follow/${userId}`);
-    const newFollow = response.data;
+    setActionLoading(userId);
+    try {
+      await axios.delete(`/follow/${userId}`);
 
-    // Remove the follow record where followingId matches userId
-    setUserData((prev) => ({
-      ...prev,
-      following: prev.following.filter((item) => item.followingId !== userId),
-    }));
+      setUserData((prev) => ({
+        ...prev,
+        following: (prev.following || []).filter(
+          (item) => item.followingId !== userId,
+        ),
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setActionLoading(null);
+    }
   };
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    axios.get('/users').then((res) => {
-      setUsers(res.data);
-    });
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get('/users');
+        setUsers(res.data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, []); // Fetch users when currentUserId changes
 
   //get all users
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <span className="loading loading-spinner text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,8 +111,16 @@ const GetAllUsers = () => {
     transform hover:scale-105 hover:shadow-lg
     focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50"
               onClick={() => handleUnfollowUser(user.id)}
+              disabled={actionLoading === user.id}
             >
-              Unfollow
+              {actionLoading === user.id ? (
+                <>
+                  <span className="loading loading-spinner mr-2" />
+                  Working...
+                </>
+              ) : (
+                'Unfollow'
+              )}
             </button>
           ) : (
             <button
@@ -90,8 +131,16 @@ const GetAllUsers = () => {
     transform hover:scale-105 hover:shadow-lg
     focus:outline-none focus:ring focus:ring-primary focus:ring-opacity-50"
               onClick={() => handleFollowUser(user.id)}
+              disabled={actionLoading === user.id}
             >
-              Follow
+              {actionLoading === user.id ? (
+                <>
+                  <span className="loading loading-spinner mr-2" />
+                  Working...
+                </>
+              ) : (
+                'Follow'
+              )}
             </button>
           )}
         </div>

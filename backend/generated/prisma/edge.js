@@ -155,7 +155,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/samyam/Documents/Social_Media/backend/generated/prisma",
+      "value": "C:\\Users\\xabil\\Social_Media\\backend\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -164,12 +164,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/samyam/Documents/Social_Media/backend/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\xabil\\Social_Media\\backend\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

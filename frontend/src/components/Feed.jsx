@@ -6,6 +6,8 @@ const Feed = () => {
 
   const myId = user?.id; // Get current user's ID
   const [feed, setFeed] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [likeLoadingId, setLikeLoadingId] = useState(null);
 
   useEffect(() => {
     const fetchFeed = async () => {
@@ -13,11 +15,43 @@ const Feed = () => {
         const res = await axios.get('/posts/feed');
         setFeed(res.data);
       } catch (error) {
-        setFeed(null);
+        setFeed([]);
+      } finally {
+        setLoading(false);
       }
     };
     fetchFeed();
   }, []);
+
+  const handleToggleLike = async (post) => {
+    const isLiked = post.likes.some((like) => like.userId === myId);
+    setLikeLoadingId(post.id);
+    try {
+      const response = await axios.post(
+        isLiked ? `/unlike/${post.id}/${myId}` : `/like/${post.id}/${myId}`,
+      );
+
+      if (response?.data?.likes) {
+        setFeed((prevFeed) =>
+          prevFeed.map((p) =>
+            p.id === post.id ? { ...p, likes: response.data.likes } : p,
+          ),
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLikeLoadingId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <span className="loading loading-spinner text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 space-y-6 max-w-2xl w-full mx-auto rounded-2xl">
@@ -63,9 +97,19 @@ const Feed = () => {
                 <button
                   className={`btn btn-outline btn-accent max-w-2xs ${isLiked ? 'btn-active' : ''}`}
                   onClick={() => handleToggleLike(post)}
+                  disabled={likeLoadingId === post.id}
                 >
-                  {isLiked ? '💖' : '🤍'} {likeCount}{' '}
-                  {likeCount === 1 ? 'like' : 'likes'}
+                  {likeLoadingId === post.id ? (
+                    <>
+                      <span className="loading loading-spinner mr-2" />
+                      Working...
+                    </>
+                  ) : (
+                    <>
+                      {isLiked ? '💖' : '🤍'} {likeCount}{' '}
+                      {likeCount === 1 ? 'like' : 'likes'}
+                    </>
+                  )}
                 </button>
               </div>
             </div>

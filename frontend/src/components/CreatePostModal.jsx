@@ -9,8 +9,10 @@ const CreatePostModal = () => {
     image: '',
     imagePreview: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handlePost = async () => {
+    setIsLoading(true);
     try {
       const formData = new FormData();
       formData.append('content', postData.content);
@@ -26,8 +28,12 @@ const CreatePostModal = () => {
         },
       });
       console.log(res);
+      setPostData({ content: '', image: '', imagePreview: '' });
+      document.getElementById('create_post_modal')?.close();
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -107,13 +113,29 @@ const CreatePostModal = () => {
           {/* ></textarea> */}
 
           <div className="flex justify-end gap-2">
-            <form method="dialog">
-              <button className="btn">Cancel</button>
-
-              <button className="btn btn-primary" onClick={handlePost}>
-                Post
-              </button>
-            </form>
+            <button
+              type="button"
+              className="btn"
+              onClick={() => document.getElementById('create_post_modal')?.close()}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handlePost}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="loading loading-spinner mr-2" />
+                  Posting...
+                </>
+              ) : (
+                'Post'
+              )}
+            </button>
           </div>
         </div>
       </dialog>
