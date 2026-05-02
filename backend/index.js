@@ -14,7 +14,7 @@ const app = express();
 // app.use(cors());
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Replace with your frontend URL
+    origin: 'https://social-media-tan-gamma.vercel.app/login', // Replace with your frontend URL
     // origin: 'http://192.168.18.254:5173', // Replace with your frontend URL
     credentials: true,
   }),
